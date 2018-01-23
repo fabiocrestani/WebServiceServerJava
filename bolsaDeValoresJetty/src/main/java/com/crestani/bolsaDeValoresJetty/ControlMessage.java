@@ -12,14 +12,8 @@ public class ControlMessage {
 		this.code = code;
 	}
 
-	public String toJson() {
-		if (code == ControlMessageCode.ACK) {
-			return "{code: ACK}";
-		} else if (code == ControlMessageCode.NACK) {
-			return "{code: NACK}";
-		} else {
-			return "{code: }";
-		}
+	public ControlMessageCode getCode() {
+		return code;
 	}
 
 }

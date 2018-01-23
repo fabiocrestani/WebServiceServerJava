@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
+import com.crestani.bolsaDeValoresJetty.ControlMessage.ControlMessageCode;
+
 public class StockMarketManagerHelper {
 	public static List<Stock> listOfStocks = new ArrayList<Stock>();
 	public static List<Bid> listOfBuyers = new LinkedList<Bid>();
@@ -26,8 +28,8 @@ public class StockMarketManagerHelper {
 			sc = new Scanner(file);
 			while (sc.hasNextLine()) {
 				String name = sc.nextLine();
-				double quantity = MyRandom.randDouble(0, 100);
-				listOfStocks.add(new Stock(name, 0, quantity));
+				double price = MyRandom.randDouble(0, 100);
+				listOfStocks.add(new Stock(name, price, 0));
 			}
 		} catch (FileNotFoundException e) {
 			throw e;
@@ -125,6 +127,14 @@ public class StockMarketManagerHelper {
 				}
 			}
 		}
+	}
+	
+	public static String ack() {
+		return JsonHelper.toJson(new ControlMessage(ControlMessageCode.ACK));
+	}
+
+	public static String nack() {
+		return JsonHelper.toJson(new ControlMessage(ControlMessageCode.NACK));
 	}
 
 }

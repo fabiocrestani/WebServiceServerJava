@@ -39,8 +39,5 @@ public class App {
 	}
 
 	private static void test() {
-		Stock stock = new Stock("ABC", 1, 10);
-		String json = GsonHelper.toJson(stock);
-		System.out.println("json produzido: " + json);
 	}
 }

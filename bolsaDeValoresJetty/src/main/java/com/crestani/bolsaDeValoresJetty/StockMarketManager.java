@@ -3,6 +3,7 @@ package com.crestani.bolsaDeValoresJetty;
 import java.util.List;
 
 import javax.servlet.annotation.WebListener;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -10,17 +11,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.crestani.bolsaDeValoresJetty.ControlMessage.ControlMessageCode;
+import com.crestani.bolsaDeValoresJetty.Bid.BidStatus;
 
 @WebListener
-@Path("/StockMarket")
+@Path("/servidorBolsaDeValores")
 public class StockMarketManager {
 
 	@GET
 	@Path("/")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String helloWorld() {
-		return "Opções disponíveis: StockMarket/Sell StockMarket/Buy StockMarket/Poll StockMarket/ListAll";
+		return "Opcoes disponiveis: StockMarket/Sell StockMarket/Buy StockMarket/Poll StockMarket/ListAll";
 	}
 
 	/**
@@ -29,10 +30,19 @@ public class StockMarketManager {
 	 * @return Mensagem de controle (ACK ou NACK)
 	 */
 	@POST
+	@Path("/Post")
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String Post(@QueryParam("bid") Bid bid) {
-		System.out.println("Cliente " + bid.getClientId() + " registando ordem de compra da ação " + bid.getStockName()
-				+ " por R$ " + bid.getNegotiatedPrice() + " e quantidade " + bid.getQuantity());
+	public String Post(String jsonInput) {
+		Bid bid = (Bid) JsonHelper.fromJson(jsonInput, Bid.class);
+		if (bid == null) {
+			return StockMarketManagerHelper.nack();
+		}
+		bid.setStatus(BidStatus.PENDING);
+
+		System.out.println("Cliente " + bid.getClientId() + " registrando ordem de compra da ação " + bid.getStockName()
+				+ " por R$ " + bid.getNegotiatedPrice() + " e quantidade " + bid.getQuantity() + " (" + bid.getStatus()
+				+ ")");
 		Bid presentBid = null;
 		List<Bid> list;
 		if (bid.getType() == Bid.BidType.BUY) {
@@ -40,7 +50,7 @@ public class StockMarketManager {
 		} else if (bid.getType() == Bid.BidType.SELL) {
 			list = StockMarketManagerHelper.listOfSellers;
 		} else {
-			return Nack();
+			return StockMarketManagerHelper.nack();
 		}
 
 		for (Bid b : list) {
@@ -48,27 +58,20 @@ public class StockMarketManager {
 				presentBid = b;
 				presentBid.setQuantity(bid.getQuantity());
 				presentBid.setNegotiatedPrice(bid.getNegotiatedPrice());
+				presentBid.setStatus(bid.getStatus());
 				StockMarketManagerHelper.computeBids();
-				return Ack();
+				return StockMarketManagerHelper.ack();
 			}
 		}
 		if (presentBid == null) {
-			presentBid = new Bid(bid.getStockName(), bid.getQuantity(), bid.getNegotiatedPrice(), bid.getType(),
+			presentBid = new Bid(bid.getStockName(), bid.getNegotiatedPrice(), bid.getQuantity(), bid.getType(),
 					bid.getClientId());
+			presentBid.setStatus(bid.getStatus());
 			list.add(presentBid);
 		}
 		StockMarketManagerHelper.computeBids();
-		return Ack();
-	}
+		return StockMarketManagerHelper.ack();
 
-	private String Ack() {
-		ControlMessage message = new ControlMessage(ControlMessageCode.ACK);
-		return GsonHelper.toJson(message);
-	}
-
-	private String Nack() {
-		ControlMessage message = new ControlMessage(ControlMessageCode.NACK);
-		return GsonHelper.toJson(message);
 	}
 
 	/**
@@ -91,14 +94,14 @@ public class StockMarketManager {
 			if (b.getStockName().equals(stockName) && (b.getClientId() == clientId)
 					&& (b.getStatus() == Bid.BidStatus.DONE)) {
 				b.setStatus(Bid.BidStatus.SENT_TO_CLIENT);
-				return b.toJson();
+				return JsonHelper.toJson(b);
 			}
 		}
 		for (Bid b : StockMarketManagerHelper.listOfBuyers) {
 			if (b.getStockName().equals(stockName) && (b.getClientId() == clientId)
 					&& (b.getStatus() == Bid.BidStatus.DONE)) {
 				b.setStatus(Bid.BidStatus.SENT_TO_CLIENT);
-				return b.toJson();
+				return JsonHelper.toJson(b);
 			}
 		}
 		return null;
@@ -113,7 +116,7 @@ public class StockMarketManager {
 	@Path("ListAll")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String listAll() {
-		return GsonHelper.toJson(StockMarketManagerHelper.listOfStocks);
+		return JsonHelper.toJson(StockMarketManagerHelper.listOfStocks);
 	}
 
 	/**
@@ -127,13 +130,16 @@ public class StockMarketManager {
 	@Path("GetPrice")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getPrice(@QueryParam("stockName") String stockName) {
-		System.out.println("GetPrice: stock name = " + stockName);
+		System.out.println("GetPrice: stock name: " + stockName);
+		if (stockName.equals("")) {
+			return StockMarketManagerHelper.nack();
+		}
 		for (Stock s : StockMarketManagerHelper.listOfStocks) {
 			if (s.getName().equals(stockName)) {
-				return GsonHelper.toJson(s);
+				return JsonHelper.toJson(s);
 			}
 		}
-		return GsonHelper.toJson(new Stock());
+		return JsonHelper.toJson(new Stock());
 	}
 
 	/**

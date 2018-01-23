@@ -104,7 +104,31 @@ public class Bid {
 		this.status = status;
 	}
 
-	public String toJson() {
-		return "{json:true}";
+	@Override
+	public String toString() {
+		String s = "Lance de ";
+		if (type == BidType.SELL) {
+			s += "venda";
+		} else if (type == BidType.BUY) {
+			s += "compra";
+		} else {
+			s += "(desconhecido)";
+		}
+		s += " da ação " + stockName;
+		s += " por R$" + negotiatedPrice;
+		s += " e quantidade " + quantity;
+		s += " (usuário id: " + clientId + ")";
+		s += " status: ";
+		if (status == BidStatus.PENDING) {
+			s += "PENDING";
+		} else if (status == BidStatus.DONE) {
+			s += "DONE";
+		} else if (status == BidStatus.SENT_TO_CLIENT) {
+			s += "SENT_TO_CLIENT";
+		} else {
+			s += "(desconhecido)";
+		}
+
+		return s;
 	}
 }
