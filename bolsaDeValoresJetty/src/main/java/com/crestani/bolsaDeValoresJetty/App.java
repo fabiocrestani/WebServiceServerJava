@@ -10,7 +10,7 @@ public class App {
 	public static void main(String[] args) {
 		System.out.println("Inicializando...");
 		try {
-			StockMarketManagerStaticContext.loadStocksFromFile();
+			StockMarketManagerHelper.loadStocksFromFile();
 		} catch (Exception e1) {
 			System.out.println("Erro ao carregar lista de ações de arquivo");
 			e1.printStackTrace();

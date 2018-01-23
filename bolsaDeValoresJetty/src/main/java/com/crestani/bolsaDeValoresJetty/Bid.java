@@ -103,4 +103,8 @@ public class Bid {
 	public void setStatus(BidStatus status) {
 		this.status = status;
 	}
+
+	public String toJson() {
+		return "{json:true}";
+	}
 }

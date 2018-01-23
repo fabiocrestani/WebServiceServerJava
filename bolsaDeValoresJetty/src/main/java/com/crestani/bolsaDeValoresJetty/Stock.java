@@ -41,6 +41,9 @@ public class Stock {
 		this.quantity = 0;
 	}
 
+	public Stock() {
+	}
+
 	public String getName() {
 		return name;
 	}
