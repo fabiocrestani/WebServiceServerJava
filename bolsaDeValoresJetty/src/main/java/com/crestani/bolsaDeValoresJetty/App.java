@@ -16,6 +16,8 @@ public class App {
 			e1.printStackTrace();
 		}
 
+		test();
+
 		ResourceConfig config = new ResourceConfig();
 		config.packages("com.crestani.bolsaDeValoresJetty");
 		ServletHolder servlet = new ServletHolder(new ServletContainer(config));
@@ -34,5 +36,11 @@ public class App {
 		} finally {
 			server.destroy();
 		}
+	}
+
+	private static void test() {
+		Stock stock = new Stock("ABC", 1, 10);
+		String json = GsonHelper.toJson(stock);
+		System.out.println("json produzido: " + json);
 	}
 }
