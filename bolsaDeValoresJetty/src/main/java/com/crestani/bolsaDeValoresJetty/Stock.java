@@ -36,7 +36,9 @@ public class Stock {
 	 *            Preço atual.
 	 */
 	public Stock(String name, double price) {
-		new Stock(name, price, 0);
+		this.name = name;
+		this.price = price;
+		this.quantity = 0;
 	}
 
 	public String getName() {

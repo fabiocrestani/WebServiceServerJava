@@ -6,12 +6,15 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-/**
- * Hello world!
- *
- */
 public class App {
 	public static void main(String[] args) {
+		System.out.println("Inicializando...");
+		try {
+			StockMarketManagerStaticContext.loadStocksFromFile();
+		} catch (Exception e1) {
+			System.out.println("Erro ao carregar lista de ações de arquivo");
+			e1.printStackTrace();
+		}
 
 		ResourceConfig config = new ResourceConfig();
 		config.packages("com.crestani.bolsaDeValoresJetty");
@@ -21,6 +24,8 @@ public class App {
 		ServletContextHandler context = new ServletContextHandler(server, "/*");
 		context.addServlet(servlet, "/*");
 
+		System.out.println("Inicializando servlet...");
+
 		try {
 			server.start();
 			server.join();
@@ -29,6 +34,5 @@ public class App {
 		} finally {
 			server.destroy();
 		}
-
 	}
 }
