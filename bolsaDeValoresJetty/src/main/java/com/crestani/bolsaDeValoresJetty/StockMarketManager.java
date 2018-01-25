@@ -87,7 +87,7 @@ public class StockMarketManager {
 	@GET
 	@Path("/Poll")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String Poll(@QueryParam("stockName") String stockName, @QueryParam("id") int clientId) {
+	public String Poll(@QueryParam("stockName") String stockName, @QueryParam("clientId") int clientId) {
 		StockMarketManagerHelper.computeBids();
 		StockMarketManagerHelper.removeAlreadyNotifiedBids();
 		for (Bid b : StockMarketManagerHelper.listOfSellers) {
